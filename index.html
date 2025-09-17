@@ -880,7 +880,7 @@
         }
     }
 
-    /* FR8SHIP Form Styling */
+    /* FR8 Form Styling */
     #fr8ship-table-section {
         margin-top: 20px;
         position: relative;
@@ -1630,7 +1630,7 @@
                                             <option value="1" selected="">Ship+</option>
                                             <option value="2">Ship</option>
 											<option value="3">Ship Direct</option>
-											<option value="4">FR8SHIP </option>
+											<option value="4">FR8 </option>
                                         </select>
                                         <div class="text-danger"></div>
                                         <p class="help-block"></p>
@@ -1789,7 +1789,7 @@
                                     </div>
                                 </div>
 
-                                <!-- FR8SHIP Dynamic Form Section -->
+                                <!-- FR8 Dynamic Form Section -->
                                 <div id="fr8ship-table-section" style="display: none; width: 100%; margin-top: 20px;">
                                     <div class="row">
                                         <div class="col-md-12">
@@ -3328,9 +3328,9 @@
                     errorList.push("Invalid Weight");
                 }
 
-                // Check for GB country and £135 limit for commercial goods (skip for FR8SHIP)
+                // Check for GB country and £135 limit for commercial goods (skip for FR8)
                 const serviceTypeSelected = fdata2['service_type'] || $('#service_type').val();
-                // Skip validation for FR8SHIP (service type 4)
+                // Skip validation for FR8 (service type 4)
                 if (serviceTypeSelected != '4' && serviceTypeSelected != 4 && consigneeCountryCode === 'GB' && productType === '1') {
                     // For commercial goods (Sale of Goods), check if declared value in GBP exceeds £135
                     if (itemValueCurrency === 'GBP' && declaredItemValue > 135) {
@@ -3361,7 +3361,7 @@
 					let service_type = $('#service_type').val();
 					var max_dim_total;
 					if (service_type == 4) {
-						max_dim_total = 99999; // No dimension limit for FR8SHIP
+						max_dim_total = 99999; // No dimension limit for FR8
 					} else if (service_type == 3) {
 						max_dim_total = 300.00;
 					} else {
@@ -3431,7 +3431,7 @@
                                 var payloadServiceTypeText = (function(v){
                                     if (v == '2') return 'Ship';
                                     if (v == '1' || v == '3') return 'Ship+';
-                                    if (v == '4') return 'FR8SHIP';
+                                    if (v == '4') return 'FR8';
                                     return 'Ship+';
                                 })(payloadServiceTypeVal);
 
@@ -3740,7 +3740,7 @@
 											
 */											
                                             if (service_type === '4') {
-                                                // FR8SHIP pricing display - use existing primeCost elements
+                                                // FR8 pricing display - use existing primeCost elements
                                                 $(".primeCost").html("<br /> <h4>INR " + resp.data
                                                     .priceWithTaxAndSurcharge + "</h4>");
                                                 $(".primeCostMessage").html(
@@ -3767,7 +3767,7 @@
                                         } else {    
                                             let serviceTypeName = 'Ship+';
                                             if (service_type === '4') {
-                                                serviceTypeName = 'FR8SHIP';
+                                                serviceTypeName = 'FR8';
                                             } else if (service_type === '2') {
                                                 serviceTypeName = 'Ship';
                                             } else if (service_type === '3') {
@@ -3808,7 +3808,7 @@
                     } else {
 						var dimensionErrorMessage;
 						if (service_type == 4) {
-							dimensionErrorMessage = 'FR8SHIP has no dimension restrictions';
+							dimensionErrorMessage = 'FR8 has no dimension restrictions';
 						} else if (service_type == 3) {
 							dimensionErrorMessage = 'Total Parcel Dimension cannot exceed 300 cms for Ship Direct';
 						} else {
@@ -3834,7 +3834,7 @@
             });
             </script>
 
-    <!-- FR8SHIP Dynamic Table JavaScript -->
+    <!-- FR8 Dynamic Table JavaScript -->
     <script>
         $(document).ready(function() {
             // Initialize: Hide Boxes option by default
@@ -3843,7 +3843,7 @@
             // Handle service type change
             $('#service_type').on('change', function() {
                 var serviceType = $(this).val();
-                if (serviceType === '4') { // FR8SHIP
+                if (serviceType === '4') { // FR8
                     // Show Boxes option and hide it for other service types
                     $('#quantity option[value="BOXES"]').show();
                     
@@ -3851,7 +3851,7 @@
                     $('#quantity').val('BOXES');
                     $('#quantity').prop('disabled', true);
                     
-                    // Enable the quantity item field for FR8SHIP
+                    // Enable the quantity item field for FR8
                     $('#no_of_pcs').prop('disabled', false);
                     
                     // Hide existing dimension and weight fields
@@ -3864,7 +3864,7 @@
                     // Hide the multiplication symbols between dimension fields
                     $('span[style*="padding-top: 37px"]').hide();
                     
-                    // Hide FR8SHIP table section initially - it will show when quantity is entered
+                    // Hide FR8 table section initially - it will show when quantity is entered
                     $('#fr8ship-table-section').hide();
                 } else {
                     // Hide Boxes option for other service types
@@ -3885,7 +3885,7 @@
                     // Show the multiplication symbols between dimension fields
                     $('span[style*="padding-top: 37px"]').show();
                     
-                    // Hide FR8SHIP table section for other service types
+                    // Hide FR8 table section for other service types
                     $('#fr8ship-table-section').hide();
                     $('#quantity').prop('disabled', false);
                 }
@@ -3895,22 +3895,22 @@
             $('#quantity').on('change', function() {
                 var serviceType = $('#service_type').val();
                 console.log('Quantity changed to:', $(this).val(), 'Service type:', serviceType);
-                if (serviceType !== '4') { // Only enable for non-FR8SHIP services
+                if (serviceType !== '4') { // Only enable for non-FR8 services
                     $('#no_of_pcs').prop('disabled', false);
                 }
             });
 
-            // Handle quantity item change for FR8SHIP
+            // Handle quantity item change for FR8
             $('#no_of_pcs').on('input', function() {
                 var serviceType = $('#service_type').val();
                 console.log('Quantity item changed to:', $(this).val(), 'Service type:', serviceType);
-                if (serviceType === '4') { // FR8SHIP
+                if (serviceType === '4') { // FR8
                     var quantity = parseInt($(this).val()) || 0;
                     var currentRows = $('#fr8ship-items-container .fr8ship-item-row').length;
-                    console.log('FR8SHIP quantity:', quantity, 'Current rows:', currentRows);
+                    console.log('FR8 quantity:', quantity, 'Current rows:', currentRows);
                     
                     if (quantity > 0) {
-                        // Show FR8SHIP table section when quantity is entered
+                        // Show FR8 table section when quantity is entered
                         $('#fr8ship-table-section').show();
                         
                         if (quantity > currentRows) {
@@ -3925,7 +3925,7 @@
                             }
                         }
                     } else {
-                        // Hide FR8SHIP table section when quantity is 0 or empty
+                        // Hide FR8 table section when quantity is 0 or empty
                         $('#fr8ship-table-section').hide();
                         // Clear all existing rows
                         $('#fr8ship-items-container').empty();
@@ -3935,7 +3935,7 @@
 
             // Add new row button click handler
             $('#add-fr8ship-row').on('click', function() {
-                // Add a new FR8SHIP box card
+                // Add a new FR8 box card
                 addFr8shipRow();
                 // Sync Quantity with number of cards
                 var rows = $('#fr8ship-items-container .fr8ship-item-row').length;
@@ -3946,7 +3946,7 @@
                 }
             });
 
-            // Function to add a new row to FR8SHIP form
+            // Function to add a new row to FR8 form
             function addFr8shipRow() {
                 var rowIndex = $('#fr8ship-items-container .fr8ship-item-row').length;
                 var newRow = `
@@ -4117,7 +4117,7 @@
                 var remainingRows = $('#fr8ship-items-container .fr8ship-item-row').length;
                 $('#no_of_pcs').val(remainingRows);
                 
-                // Hide FR8SHIP section if no items remain
+                // Hide FR8 section if no items remain
                 if (remainingRows === 0) {
                     $('#fr8ship-table-section').hide();
                 }
