@@ -3423,7 +3423,7 @@
 
                                 // General shipment fields
                                 var payloadProduct = $('#product option:selected').text() || '';
-                                var payloadProductTypeText = $('#terms_of_invoice option:selected').text() || '';
+                                var payloadProductTypeText = $('#product option:selected').text() || '';
                                 var payloadDeclaredValue = parseFloat($('#declared_item_value').val() || '0') || 0;
                                 var payloadCurrency = $('#item_value_currency').val() || 'USD';
                                 var payloadLength = $('#length_cm').val() || '';
