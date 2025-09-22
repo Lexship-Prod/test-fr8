@@ -3430,7 +3430,7 @@
                                 var payloadBreadth = $('#width_cm').val() || '';
                                 var payloadHeight = $('#height_cm').val() || '';
                                 var payloadWeightGm = parseFloat($('#weight_kg').val() || '0') || 0; // labelled grams in UI
-                                var payloadWeightKg = payloadWeightGm ? (payloadWeightGm/1000) : 0;
+                                var payloadWeightKg = payloadWeightGm ? parseFloat((payloadWeightGm/1000).toFixed(2)) : 0;
                                 var payloadPcs = $('#no_of_pcs').val() || '';
                                 var payloadReferenceId = $('#reference_id').val() || '';
                                 var payloadInvoiceDate = $('#invoice_date_ci').val() || dateStr;
@@ -3460,7 +3460,7 @@
                                         var W = parseFloat(($row.find('input[name^="fr8ship_width_"]').val() || '0')) || 0;
                                         var H = parseFloat(($row.find('input[name^="fr8ship_height_"]').val() || '0')) || 0;
                                         var wg = parseFloat(($row.find('input[name^="fr8ship_weight_"]').val() || '0')) || 0; // grams
-                                        var wk = wg ? (wg/1000) : 0;
+                                        var wk = wg ? parseFloat((wg/1000).toFixed(2)) : 0;
                                         var volKg = (L && W && H) ? ((L * W * H) / 5000) : 0;
 
                                         // Get all line items (including the first one that's always present)
@@ -3610,6 +3610,8 @@
                                     boxes.forEach(function(box) {
                                         totalBoxWeight += box.WeightKg || 0;
                                     });
+                                    // Round to 2 decimal places to avoid floating point precision issues
+                                    totalBoxWeight = parseFloat(totalBoxWeight.toFixed(2));
                                 }
 
                                 var payload = {
