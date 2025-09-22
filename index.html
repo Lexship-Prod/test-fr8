@@ -958,6 +958,18 @@
         transform: translateY(-1px);
     }
 
+    /* Checkbox styles */
+    .item-checkbox, .select-all-items {
+        transform: scale(1.2);
+        cursor: pointer;
+        margin-top: 5px;
+    }
+
+    /* Simple checkbox styling - no background highlighting */
+    .item-checkbox:checked {
+        accent-color: #007bff;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .fr8ship-item-row {
@@ -3574,6 +3586,14 @@
                                     });
                                 }
 
+                                // Calculate total weight from all boxes
+                                var totalBoxWeight = 0;
+                                if (boxes.length > 0) {
+                                    boxes.forEach(function(box) {
+                                        totalBoxWeight += box.WeightKg || 0;
+                                    });
+                                }
+
                                 var payload = {
                                     slno: 1,
                                     sellerID: 'LEX',
@@ -3607,7 +3627,7 @@
                                     breadthUnit: 'CMS',
                                     height: String(payloadHeight || ''),
                                     heightUnit: 'CMS',
-                                    weight: payloadWeightKg || 0,
+                                    weight: totalBoxWeight || payloadWeightKg || 0,
                                     weightUnit: 'KGS',
                                     quantity: 'PCS',
                                     Pcs: String(payloadPcs || (items.length || 1)),
@@ -3966,18 +3986,22 @@
                             <div class="col-md-12">
                                 <h6 style="margin:10px 0 8px 0; color:#495057;">Items in this box</h6>
                                 <div class="row" style="margin-bottom:8px; font-weight:600; color:#495057; font-size:12px;">
+                                    <div class="col-md-1">Select</div>
                                     <div class="col-md-2">Qty</div>
-                                    <div class="col-md-5">Product Description</div>
+                                    <div class="col-md-4">Product Description</div>
                                     <div class="col-md-2">HSCode</div>
                                     <div class="col-md-2">Declared Item Value</div>
                                     <div class="col-md-1">Action</div>
                                 </div>
                                 <div id="fr8ship_lineitems_${rowIndex}" class="fr8ship-lineitems" data-count="1">
                                     <div class="row fr8ship-subitem" data-sub-index="1" style="margin-top:6px; margin-bottom:10px;"> 
+                                        <div class="col-md-1">
+                                            <input type="checkbox" class="item-checkbox" title="Select this item">
+                                        </div>
                                         <div class="col-md-2"> 
                                             <input type="number" step="1" min="1" class="form-control" name="fr8ship_item_qty_${rowIndex}_1" placeholder="Qty" required> 
                                         </div>
-                                        <div class="col-md-5"> 
+                                        <div class="col-md-4"> 
                                             <input type="text" class="form-control" name="fr8ship_product_desc_${rowIndex}_1" placeholder="Product Description" required> 
                                         </div>
                                         <div class="col-md-2"> 
@@ -3987,7 +4011,7 @@
                                             <input type="number" step="any" min="0" class="form-control" name="fr8ship_item_value_${rowIndex}_1" placeholder="Declared Item Value" required> 
                                         </div>
                                         <div class="col-md-1"> 
-                                            <button type="button" class="btn btn-outline-danger btn-sm remove-fr8ship-subitem" title="Remove item"><i class="fa fa-trash"></i></button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-fr8ship-subitem" title="Select item first, then delete" disabled><i class="fa fa-trash"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -4076,10 +4100,13 @@
                     var subIndex = currentCount + 1;
                     var subRow = `
                         <div class=\"row fr8ship-subitem\" data-sub-index=\"${subIndex}\" style=\"margin-top:6px; margin-bottom:10px;\"> 
+                            <div class=\"col-md-1\">
+                                <input type=\"checkbox\" class=\"item-checkbox\" title=\"Select this item\">
+                            </div>
                             <div class=\"col-md-2\"> 
                                 <input type=\"number\" step=\"1\" min=\"1\" class=\"form-control\" name=\"fr8ship_item_qty_${rowIndex}_${subIndex}\" placeholder=\"Qty\" required> 
                             </div>
-                            <div class=\"col-md-5\"> 
+                            <div class=\"col-md-4\"> 
                                 <input type=\"text\" class=\"form-control\" name=\"fr8ship_product_desc_${rowIndex}_${subIndex}\" placeholder=\"Product Description\" required> 
                             </div>
                             <div class=\"col-md-2\"> 
@@ -4089,16 +4116,29 @@
                                 <input type=\"number\" step=\"any\" min=\"0\" class=\"form-control\" name=\"fr8ship_item_value_${rowIndex}_${subIndex}\" placeholder=\"Declared Item Value\" required> 
                             </div>
                             <div class=\"col-md-1\"> 
-                                <button type=\"button\" class=\"btn btn-outline-danger btn-sm remove-fr8ship-subitem\" title=\"Remove item\"><i class=\"fa fa-trash\"></i></button>
+                                <button type=\"button\" class=\"btn btn-outline-danger btn-sm remove-fr8ship-subitem\" title=\"Select item first, then delete\" disabled><i class=\"fa fa-trash\"></i></button>
                             </div>
                         </div>`;
                     container.append(subRow);
                     container.attr('data-count', subIndex);
+                    
+                    // Setup checkbox functionality for the new sub-item
+                    setupCheckboxFunctionality(rowIndex);
                 });
 
-                // Remove a sub item within this row
+                // Remove a sub item within this row (only if selected)
                 $(document).off('click', `#fr8ship_lineitems_${rowIndex} .remove-fr8ship-subitem`).on('click', `#fr8ship_lineitems_${rowIndex} .remove-fr8ship-subitem`, function() {
-                    $(this).closest('.fr8ship-subitem').remove();
+                    var $subitem = $(this).closest('.fr8ship-subitem');
+                    var $checkbox = $subitem.find('.item-checkbox');
+                    
+                    if ($checkbox.is(':checked')) {
+                        $subitem.remove();
+                        // Update selection after removal
+                        updateItemSelection(rowIndex);
+                    } else {
+                        // Show message that item needs to be selected first
+                        alert('Please select the item first by checking the checkbox, then click delete.');
+                    }
                 });
 
                 // Remove row button
@@ -4107,6 +4147,38 @@
                     // Update quantity item field
                     var remainingRows = $('#fr8ship-items-container .fr8ship-item-row').length;
                     $('#no_of_pcs').val(remainingRows);
+                });
+
+                // Checkbox functionality for this row
+                setupCheckboxFunctionality(rowIndex);
+            }
+
+            // Simple checkbox functionality setup
+            function setupCheckboxFunctionality(rowIndex) {
+                var row = $(`#fr8ship_lineitems_${rowIndex}`).closest('.fr8ship-item-row');
+                var itemCheckboxes = row.find('.item-checkbox');
+
+                // Individual checkbox functionality
+                itemCheckboxes.off('change').on('change', function() {
+                    updateItemSelection(rowIndex);
+                });
+            }
+
+            // Update delete button states based on checkbox selection
+            function updateItemSelection(rowIndex) {
+                var row = $(`#fr8ship_lineitems_${rowIndex}`).closest('.fr8ship-item-row');
+                var itemCheckboxes = row.find('.item-checkbox');
+                
+                itemCheckboxes.each(function() {
+                    var $this = $(this);
+                    var $subitem = $this.closest('.fr8ship-subitem');
+                    var $deleteBtn = $subitem.find('.remove-fr8ship-subitem');
+                    
+                    if ($this.is(':checked')) {
+                        $deleteBtn.prop('disabled', false).removeClass('btn-outline-danger').addClass('btn-danger');
+                    } else {
+                        $deleteBtn.prop('disabled', true).removeClass('btn-danger').addClass('btn-outline-danger');
+                    }
                 });
             }
 
