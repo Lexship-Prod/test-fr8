@@ -3527,7 +3527,7 @@
                                                 
                                                 hsnGroups[hsn].descriptions.push(item.Description);
                                                 hsnGroups[hsn].totalQuantity += item.Quantity || 0;
-                                                hsnGroups[hsn].totalValue += item.DeclaredValue || 0;
+                                                hsnGroups[hsn].totalValue += item.DeclaredItemValue || 0;
                                                 hsnGroups[hsn].itemCount += 1;
                                                 
                                                 // Use dimensions from the first box containing this HSCode
@@ -3548,7 +3548,25 @@
                                         Object.keys(hsnGroups).forEach(function(hsn) {
                                             var group = hsnGroups[hsn];
                                             var unitValue = group.totalQuantity > 0 ? (group.totalValue / group.totalQuantity) : 0;
-                                            var proportionalWeight = totalWeight > 0 ? (group.totalValue / (Object.keys(hsnGroups).reduce(function(sum, key) { return sum + hsnGroups[key].totalValue; }, 0))) * totalWeight : 0;
+                                            
+                                            // Calculate proportional weight based on value distribution
+                                            var totalValue = Object.keys(hsnGroups).reduce(function(sum, key) { 
+                                                return sum + (hsnGroups[key].totalValue || 0); 
+                                            }, 0);
+                                            
+                                            // If no values are provided, distribute weight equally among HSN groups
+                                            var proportionalWeight;
+                                            if (totalValue > 0 && group.totalValue > 0) {
+                                                proportionalWeight = (group.totalValue / totalValue) * totalWeight;
+                                            } else if (totalWeight > 0) {
+                                                // Distribute weight equally among all HSN groups
+                                                proportionalWeight = totalWeight / Object.keys(hsnGroups).length;
+                                            } else {
+                                                proportionalWeight = 0;
+                                            }
+                                            
+                                            // Ensure we have a valid number
+                                            proportionalWeight = isNaN(proportionalWeight) ? 0 : proportionalWeight;
                                             
                                             items.push({
                                                 Item_Description: group.descriptions.join(','),
